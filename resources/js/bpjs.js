@@ -1,4 +1,5 @@
-
+let diagTom;
+let poliTom;
 document.addEventListener('DOMContentLoaded', function () {
     const laka = document.getElementById('lakaLantas')
     if (!laka) return
@@ -58,6 +59,59 @@ if (isSKDP) {
 
         });
     });
+     diagTom = new TomSelect("#diagAwal", {
+        valueField: "kode",
+        labelField: "nama",
+        searchField: ["kode", "nama"],
+        load: function(query, callback) {
+            if (!query.length) return callback();
+
+            fetch(`/bpjs/referensi-diagnosa/${query}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (!json.metaData || json.metaData.code != 200) {
+                        callback();
+                        return;
+                    }
+                    callback(json.response.diagnosa);
+                })
+                .catch(() => callback());
+        },
+        render: {
+            option: (item, escape) =>
+                `<div>${escape(item.kode)} - ${escape(item.nama)}</div>`,
+            item: (item, escape) =>
+                `<div>${escape(item.kode)} - ${escape(item.nama)}</div>`
+        }
+    });
+
+    poliTom = new TomSelect("#tujuan", {
+        valueField: "kode",
+        labelField: "nama",
+        searchField: ["kode", "nama"],
+        load: function(query, callback) {
+            if (!query.length) return callback();
+
+            fetch(`/bpjs/referensi-poli/${query}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (!json.metaData || json.metaData.code != 200) {
+                        callback();
+                        return;
+                    }
+                    callback(json.response.poli);
+                })
+                .catch(() => callback());
+        },
+        render: {
+            option: (item, escape) =>
+                `<div>${escape(item.kode)} - ${escape(item.nama)}</div>`,
+            item: (item, escape) =>
+                `<div>${escape(item.kode)} - ${escape(item.nama)}</div>`
+        }
+    
+});
+
 })
 function validate(class_name) {
 
@@ -207,7 +261,7 @@ function init_dpjp(jnsLayanan, tglLayanan, poli_bpjs) {
     dropdown.prop('selectedIndex', 0);
 
     $.ajax({
-        url: "/bpjs/getDpjp?jenisPelayanan=" +
+        url: "/bpjs/dpjp?jenisPelayanan=" +
             jnsLayanan +
             "&tglPelayanan=" + tglLayanan +
             "&kodeSpesialis=" + poli_bpjs,
@@ -574,7 +628,7 @@ $(document).on('click', '#search_dpjp', function() {
 
     $.ajax({
         type: "GET",
-        url: "/bpjs/getDpjp?jenisPelayanan=" +
+        url: "/bpjs/dpjp?jenisPelayanan=" +
             jenis_pelayanan +
             "&tglPelayanan=" + tgl_pelayanan +
             "&kodeSpesialis=" + kode_spesialis,
@@ -954,10 +1008,32 @@ $(document).on('change', '#statusPulang', function() {
 });
 $(document).ready(function() {
 
+$('#tujuan').on('change', function () {
 
+    let kodePoli = $(this).val();
+    if (!kodePoli) return;
 
-    
+    let today = new Date().toISOString().split('T')[0];
 
+    $.get(`/bpjs/dpjp?jenisPelayanan=2&tglPelayanan=${today}&kodeSpesialis=${kodePoli}`, function (res) {
+
+        if (!res.metaData || res.metaData.code != 200) {
+            return;
+        }
+
+        let dropdown = $('#dpjpLayan');
+        dropdown.empty();
+        dropdown.append('<option value="">Pilih DPJP</option>');
+
+        res.response.list.forEach(function (item) {
+            dropdown.append(
+                `<option value="${item.kode}">
+                    ${item.kode} - ${item.nama}
+                 </option>`
+            );
+        });
+    });
+});
     // Load Propinsi
     getPropinsi();
 
@@ -1105,39 +1181,58 @@ $(document).on('click', '.pilih_rujukan_rs', function (e) {
 
     if (!detail) return;
 
-    // ===== AUTO FILL FIELD =====
+    // =========================
+    // AUTO FILL DATA PESERTA
+    // =========================
     $('#nama_peserta').val(detail.peserta.nama);
     $('#noKartu').val(detail.peserta.noKartu);
     $('#nik').val(detail.peserta.nik);
-    $('#noMr').val(detail.peserta.mr.noMR);
-    $('#noTelp').val(detail.peserta.mr.noTelepon);
+    $('#noMr').val(detail.peserta.mr?.noMR ?? '');
+    $('#noTelp').val(detail.peserta.mr?.noTelepon ?? '');
 
+    // =========================
+    // DATA RUJUKAN
+    // =========================
     $('#noRujukan').val(detail.noKunjungan);
     $('#ppkRujukan').val(detail.provPerujuk.kode);
     $('#ppkRujukan_txt').val(detail.provPerujuk.nama);
 
-    $('#diagAwal').val(detail.diagnosa.kode);
-    $('#tujuan').val(detail.poliRujukan.kode);
+    // =========================
+    // AUTO SET FASKES 1
+    // =========================
+    $('#asalRujukan').val('1'); // 🔥 langsung faskes 1
+// =========================
+// DIAGNOSA OTOMATIS
+// =========================
+if (diagTom) {
+    diagTom.clear();
+    diagTom.addOption({
+        kode: detail.diagnosa.kode,
+        nama: detail.diagnosa.nama
+    });
+    diagTom.setValue(detail.diagnosa.kode);
+}
 
-    // Set asal rujukan otomatis
-    $('#asalRujukan').val(
-        detail.response?.asalFaskes ?? '2'
-    );
-    // Lock diagnosa & poli
-$('#diagAwal_text').prop('readonly', true);
-$('#btn_cari_diagnosa').prop('disabled', true);
+// =========================
+// POLI OTOMATIS
+// =========================
+if (poliTom) {
+    poliTom.clear();
+    poliTom.addOption({
+        kode: detail.poliRujukan.kode,
+        nama: detail.poliRujukan.nama
+    });
+    poliTom.setValue(detail.poliRujukan.kode);
+}
 
-$('#tujuan_text').prop('readonly', true);
-$('#btn_cari_poli').prop('disabled', true);
+// Load DPJP
+loadDpjp(detail.poliRujukan.kode);
 
-    // ===== TUTUP MODAL (Bootstrap 5 way) =====
-    let modal = bootstrap.Modal.getInstance(
+    bootstrap.Modal.getInstance(
         document.getElementById('modalRujukanRS')
-    );
+    ).hide();
 
-    if (modal) modal.hide();
-
-    Swal.fire('Berhasil', 'Rujukan dipilih', 'success');
+    Swal.fire('Berhasil', 'Rujukan dipilih & Faskes otomatis Faskes 1', 'success');
 });
 
 
@@ -1425,7 +1520,7 @@ function loadDpjp(kodePoli) {
 
     let today = new Date().toISOString().split('T')[0];
 
-    $.get(`/bpjs/getDpjp?jenisPelayanan=2&tglPelayanan=${today}&kodeSpesialis=${kodePoli}`, function (res) {
+    $.get(`/bpjs/dpjp?jenisPelayanan=2&tglPelayanan=${today}&kodeSpesialis=${kodePoli}`, function (res) {
 
         if (res.metaData.code != 200) {
             Swal.fire('Error', res.metaData.message, 'error');

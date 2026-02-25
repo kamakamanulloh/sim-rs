@@ -1,17 +1,20 @@
 import './bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import $ from 'jquery';
-window.$ = $;
-window.jQuery = $;
+import 'bootstrap/dist/css/bootstrap.min.css';
 
+import TomSelect from "tom-select";
+import "tom-select/dist/css/tom-select.bootstrap5.css";
 
-import * as bootstrap from 'bootstrap'
+// 🔥 expose ke global supaya bisa dipakai di bpjs.js
+window.TomSelect = TomSelect;
+
+import * as bootstrap from 'bootstrap';
 window.bootstrap = bootstrap;
+
 import Swal from 'sweetalert2';
 window.Swal = Swal;
-import moment from 'moment'
-window.moment = moment
-// =============================
+
+import moment from 'moment';
+window.moment = moment;
 // GLOBAL FUNCTIONS HARUS DIBUAT DULU
 // =============================
 
@@ -59,3 +62,5 @@ document.addEventListener("DOMContentLoaded", function () {
         dateFormat: "d-m-Y"
     });
 });
+
+

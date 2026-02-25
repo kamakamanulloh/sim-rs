@@ -27,12 +27,13 @@
     <b>{{ $registrasi->pasien->nama }}</b><br>
     No RM: {{ $registrasi->pasien->no_rm }}<br>
     No Rawat: {{ $registrasi->no_rawat }}<br>
-    Poli: {{ $registrasi->poli }}<br>
+    Poli: {{ $registrasi->nama_poli }}<br>
+     DPJP: {{ $registrasi->nama_dokter }}<br>
     Tanggal: {{ date('d-m-Y') }}
 
     <br><br>
 
-    <img src="data:image/png;base64,{{ $qr }}">
+   <img src="data:image/png;base64,{{ $qr }}" width="120">
 </div>
 
 </body>

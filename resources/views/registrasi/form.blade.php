@@ -262,10 +262,12 @@
                     <div class="reg-row">
                         <div>
                             <label>Pilih Poli</label>
-                            <select name="poli" id="poli" class="reg-input">
+                           <select name="poli" id="poli" class="reg-input">
                                 <option value="">Pilih Poli</option>
                                 @foreach($list_poli as $p)
-                                    <option value="{{ $p->poli_id }}">{{ $p->nama_poli }}</option>
+                                    <option value="{{ $p->poli_id }}" data-tipe="{{ $p->tipe }}">
+                                        {{ $p->nama_poli }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

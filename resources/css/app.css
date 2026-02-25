@@ -1,0 +1,22 @@
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+.table thead th {
+    font-weight: 600;
+}
+
+.badge {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+.table-responsive {
+    overflow: visible !important;
+}
+
+.dropdown-menu {
+    z-index: 1055 !important;
+}
+.overflow-visible {
+    overflow: visible !important;
+}

@@ -42,11 +42,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/cetak/{no_rawat}',[RegistrasiController::class,'cetakEtiket']);
    Route::get('/create/{id}', [RegistrasiController::class,'create'])->name('registrasi.create');
     Route::post('/store', [RegistrasiController::class,'store'])->name('registrasi.store');
-
+Route::post('/batal', [RegistrasiController::class, 'batal']);
 
 
       Route::get('/api/dokter-igd', [RegistrasiController::class, 'dokterIgd']);
     Route::post('/api/jadwal-dokter', [RegistrasiController::class, 'jadwalDokter']);
+
+
+
+        Route::post('/simpan', [RegistrasiController::class, 'store'])
+            ->name('registrasi.simpan');
 
 });
 
@@ -69,6 +74,7 @@ Route::prefix('bpjs')->group(function () {
 
     Route::get('/cek-peserta', [BpjsController::class, 'cekPeserta']);
     Route::get('/history', [BpjsController::class, 'history']);
+    Route::get('/dpjp', [BpjsController::class, 'getDpjp']);
 
     Route::get('/rujukan-list', [BpjsController::class, 'rujukanList']);
     Route::get('/rujukan-detail', [BpjsController::class, 'rujukanDetail']);

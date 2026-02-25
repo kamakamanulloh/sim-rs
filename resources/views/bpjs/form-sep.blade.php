@@ -311,89 +311,69 @@
             </div>
 
             <!-- TAB 3 -->
-            <div class="bpjs-tab-pane" id="tab3">
-                <div class="bpjs-grid">
+           <!-- TAB 3 -->
+<div class="bpjs-tab-pane" id="tab3">
+    <div class="bpjs-grid">
 
-                    <!-- Diagnosa Awal -->
-                    <div class="bpjs-col-4">
-                        <label>
-                            Diagnosa Awal <span class="req">*</span>
-                        </label>
+        <!-- ===================== -->
+        <!-- ROW 1 -->
+        <!-- ===================== -->
 
-                       <input type="hidden" name="diagAwal" id="diagAwal">
+        <!-- Diagnosa Awal -->
+        <div class="bpjs-col-6">
+            <label>Diagnosa Awal <span class="req">*</span></label>
 
-                        <div class="bpjs-input-group">
-                            <input type="text"
-                                id="diagAwal_text"
-                                class="bpjs-control"
-                                placeholder="Pilih diagnosa"
-                                readonly>
+            <select name="diagAwal"
+                    id="diagAwal"
+                    class="bpjs-control"
+                    placeholder="Cari kode / nama diagnosa">
+            </select>
+        </div>
 
-                            <button type="button"
-                                    id="btn_cari_diagnosa"
-                                    class="bpjs-btn-outline-sm">
-                                Cari
-                            </button>
-                        </div>
-                    </div>
+        <!-- Poli Tujuan -->
+        <div class="bpjs-col-3">
+            <label>Poli Tujuan <span class="req">*</span></label>
 
-                    <!-- Poli Tujuan -->
-                    <div class="bpjs-col-4">
-                        <label>
-                            Poli Tujuan <span class="req">*</span>
-                        </label>
+            <select name="tujuan"
+                    id="tujuan"
+                    class="bpjs-control"
+                    placeholder="Cari poli">
+            </select>
 
-                        <input type="hidden" name="tujuan" id="tujuan">
+            <small class="bpjs-help">
+                Tidak bisa diubah pada kunjungan pertama
+            </small>
+        </div>
 
-                        <div class="bpjs-input-group">
-                            <input type="text"
-                                id="tujuan_text"
-                                class="bpjs-control"
-                                placeholder="Pilih poli"
-                                readonly>
+        <!-- Poli Eksekutif -->
+        <div class="bpjs-col-3">
+            <label>Poli Eksekutif</label>
 
-                            <button type="button"
-                                    id="btn_cari_poli"
-                                    class="bpjs-btn-outline-sm">
-                                Cari
-                            </button>
-                        </div>
+            <select name="eksekutif"
+                    id="eksekutif"
+                    class="bpjs-control">
+                <option value="0" selected>Tidak</option>
+                <option value="1">Ya</option>
+            </select>
+        </div>
 
-                        <small class="bpjs-help">
-                            Tidak bisa diubah pada kunjungan pertama
-                        </small>
-                    </div>
+        <!-- ===================== -->
+        <!-- ROW 2 -->
+        <!-- ===================== -->
 
-                    <!-- Poli Eksekutif -->
-                    <div class="bpjs-col-4">
-                        <label>
-                            Poli Eksekutif <span class="req">*</span>
-                        </label>
+        <!-- DPJP -->
+        <div class="bpjs-col-12">
+            <label>DPJP Pelayanan <span class="req">*</span></label>
 
-                        <select name="eksekutif"
-                                id="eksekutif"
-                                class="bpjs-control">
-                            <option value="">Pilih</option>
-                            <option value="0" selected>Tidak</option>
-                            <option value="1">Ya</option>
-                        </select>
-                    </div>
+            <select name="dpjpLayan"
+                    id="dpjpLayan"
+                    class="bpjs-control">
+                <option value="">Pilih Dokter</option>
+            </select>
+        </div>
 
-                    <!-- DPJP -->
-                    <div class="bpjs-col-12">
-                        <label>
-                            DPJP Pelayanan <span class="req">*</span>
-                        </label>
-
-                        <select name="dpjpLayan"
-                                id="dpjpLayan"
-                                class="bpjs-control">
-                            <option value="">Cari DPJP</option>
-                        </select>
-                    </div>
-
-                </div>
-            </div>
+    </div>
+</div>
             <div class="bpjs-tab-pane" id="tab4">
                 <div class="bpjs-grid">
 

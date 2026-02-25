@@ -31,31 +31,51 @@ $(function () {
     // TIPE RAWAT
     // ==============================
 
-    $("#tipe_rawat").on("change", function () {
+ $("#tipe_rawat").on("change", function () {
 
-        let tipe = $(this).val();
+    let tipe = $(this).val();
 
-        // reset jadwal & poli
-        $("#jadwal_dokter").html('<option value="">Pilih Jadwal</option>');
-        $("#poli").val("");
+    // reset jadwal
+    $("#jadwal_dokter").html('<option value="">Pilih Jadwal</option>');
 
-        if (tipe === "G") {
+    // reset poli
+    $("#poli").val("");
 
-            // IGD -> ambil dokter IGD
-            $.get("/registrasi/api/dokter-igd", function (data) {
+    // tampilkan semua dulu
+    $("#poli option").show();
 
-                let opt = '<option value="">Pilih Dokter IGD</option>';
+    if (!tipe) return;
 
-                data.forEach(function (d) {
-                    opt += `<option value="${d.id}">${d.nama_lengkap}</option>`;
-                });
+    // sembunyikan poli yang tidak sesuai tipe
+    $("#poli option").each(function () {
 
-                $("#jadwal_dokter").html(opt);
-            });
+        let poliTipe = $(this).data("tipe");
 
+        if (poliTipe && poliTipe !== tipe) {
+            $(this).hide();
         }
 
     });
+
+    // =============================
+    // Jika IGD (G)
+    // =============================
+    if (tipe === "G") {
+
+        $.get("/registrasi/api/dokter-igd", function (data) {
+
+            let opt = '<option value="">Pilih Dokter IGD</option>';
+
+            data.forEach(function (d) {
+                opt += `<option value="${d.id}">${d.nama_lengkap}</option>`;
+            });
+
+            $("#jadwal_dokter").html(opt);
+        });
+
+    }
+
+});
 
 
 
@@ -204,20 +224,22 @@ $("#cara_bayar").on("change", function(){
    $("#form-reg").on("submit", function(e){
 
     e.preventDefault();
+     window.showLoading();
 
     let formData = $(this).serialize();
 
     $.post("/registrasi/simpan", formData, function(res){
 
         if(res.status === "success"){
+              window.hideLoading();
 
-            // 🔥 Buka etiket di tab baru
             window.open(
                 "/registrasi/cetak-etiket/" + res.no_rawat,
                 "_blank"
             );
 
           if(res.cara_bayar === "BPJS"){
+              window.hideLoading();
 
                 Swal.fire({
                     icon: "success",

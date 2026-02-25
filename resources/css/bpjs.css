@@ -364,3 +364,31 @@
 .bpjs-btn-primary {
     min-width: 160px;
 }
+.bpjs-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.bpjs-col-12 { width: 100%; }
+.bpjs-col-6  { width: calc(50% - 8px); }
+.bpjs-col-4  { width: calc(33.333% - 11px); }
+.bpjs-col-3  { width: calc(25% - 12px); }
+.bpjs-col-2  { width: calc(16.666% - 14px); }
+
+@media (max-width: 992px) {
+    .bpjs-col-6,
+    .bpjs-col-4,
+    .bpjs-col-3,
+    .bpjs-col-2 {
+        width: 100%;
+    }
+}
+.ts-wrapper {
+    width: 100% !important;
+}
+
+.ts-control {
+    min-height: 42px;
+    border-radius: 8px;
+}

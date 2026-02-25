@@ -12,6 +12,8 @@ use App\Models\Pekerjaan;
 use App\Models\Pendidikan;
 use App\Models\Penjamin;
 use App\Models\Suku;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 
 
 class RegistrasiController extends Controller
@@ -19,27 +21,70 @@ class RegistrasiController extends Controller
 
 public function index(Request $request)
 {
-    $query = DB::table('jadwal_dokter')
-        ->join('pegawai','pegawai.id','=','jadwal_dokter.id_pegawai')
-        ->join('master_poli','master_poli.poli_id','=','jadwal_dokter.poli_id')
-        ->select(
-            'jadwal_dokter.*',
-            'pegawai.nama_lengkap as nama_dokter',
-            'master_poli.nama_poli'
-        );
+   $query = Registrasi::with('pasien')
+    ->leftJoin('jadwal_dokter', 'jadwal_dokter.id', '=', 'registrasi.jadwal_dokter')
+    ->leftJoin('pegawai', 'pegawai.id', '=', 'jadwal_dokter.id_pegawai')
+    ->leftJoin('master_poli', 'master_poli.poli_id', '=', 'registrasi.poli')
+    ->leftJoin('pasien', 'pasien.id', '=', 'registrasi.id_pasien')
+ ->leftJoin('sep', function ($join) {
+    $join->on(
+        DB::raw('sep.no_rawat COLLATE utf8mb4_general_ci'),
+        '=',
+        DB::raw('registrasi.no_rawat COLLATE utf8mb4_general_ci')
+    )
+    ->whereNull('sep.deleted_at');
+})
+    ->select(
+        'registrasi.*',
+        'pasien.no_rm',
+        'pasien.nama as nama_pasien',
+        'pasien.jenis_kelamin',
+        'pegawai.nama_lengkap as nama_dokter',
+        'master_poli.nama_poli',
+        'sep.noSep'
+    )
+    ->when($request->keyword, function ($q) use ($request) {
+        $q->where(function ($sub) use ($request) {
+            $sub->where('pasien.nama', 'like', '%'.$request->keyword.'%')
+                ->orWhere('pasien.no_rm', 'like', '%'.$request->keyword.'%');
+        });
+    });
 
-    if ($request->keyword) {
-        $query->where('pegawai.nama_lengkap','like','%'.$request->keyword.'%');
-    }
+    $data = $query
+        ->orderByDesc('registrasi.tanggal_registrasi')
+        ->paginate(10);
 
-    if ($request->hari) {
-        $query->where('jadwal_dokter.hari',$request->hari);
-    }
+     // summary
+    $totalHariIni = Registrasi::whereDate('tanggal_registrasi', now())->count();
+    $totalRajal   = Registrasi::where('tipe_rawat','J')->count();
+    $totalIgd     = Registrasi::where('tipe_rawat','G')->count();
+    $totalRanap   = Registrasi::where('tipe_rawat','I')->count();
 
-    $jadwal = $query->orderBy('hari')
-        ->paginate($request->perPage ?? 10);
+    return view('registrasi.index', compact(
+        'data',
+        'totalHariIni',
+        'totalRajal',
+        'totalIgd',
+        'totalRanap'
+    ));
+}
+public function batal(Request $request)
+{
+    $request->validate([
+        'id' => 'required',
+        'alasan' => 'required'
+    ]);
 
-    return view('registrasi.index',compact('jadwal'));
+    Registrasi::where('id', $request->id)
+        ->update([
+            'status' => 'Batal',
+            'keterangan_pulang' => $request->alasan,
+            'cara_pulang' => 'Batal'
+        ]);
+
+    return response()->json([
+        'status' => 'success'
+    ]);
 }
 public function create($id)
 {
@@ -87,20 +132,18 @@ public function jadwalDokter(\Illuminate\Http\Request $request)
     $hari_indo = $hari_map[$hari];
 
     $jam_now = date('H:i');
+    
 
-    $jadwal = \DB::table('jadwal_dokter')
-        ->join('pegawai', 'pegawai.id', '=', 'jadwal_dokter.id_pegawai')
-        ->select(
-            'jadwal_dokter.*',
-            'pegawai.nama_lengkap as nama_dokter'
-        )
-        ->where('jadwal_dokter.id_poli', $poli_id)
-        ->where('jadwal_dokter.hari', $hari_indo)
-        ->where('jadwal_dokter.jam_mulai', '<=', $jam_now)
-        ->where('jadwal_dokter.jam_selesai', '>=', $jam_now)
-        ->where('jadwal_dokter.status', 'Praktek')
-        ->get();
-
+   $jadwal = \DB::table('jadwal_dokter')
+    ->join('pegawai', 'pegawai.id', '=', 'jadwal_dokter.id_pegawai')
+    ->select(
+        'jadwal_dokter.*',
+        'pegawai.nama_lengkap as nama_dokter'
+    )
+    ->where('jadwal_dokter.id_poli', $poli_id)
+    ->where('jadwal_dokter.hari', $hari_indo)
+    ->where('jadwal_dokter.status', 'Praktek')
+    ->get();
     return response()->json($jadwal);
 }
 
@@ -222,16 +265,42 @@ public function datatableRajal(Request $request)
 public function cetakEtiket($no_rawat)
 {
     $registrasi = Registrasi::with('pasien')
-        ->where('no_rawat',$no_rawat)
+        ->where('registrasi.no_rawat',$no_rawat)
+         ->leftJoin('jadwal_dokter', 'jadwal_dokter.id', '=', 'registrasi.jadwal_dokter')
+    ->leftJoin('pegawai', 'pegawai.id', '=', 'jadwal_dokter.id_pegawai')
+    ->leftJoin('master_poli', 'master_poli.poli_id', '=', 'registrasi.poli')
+    ->leftJoin('pasien', 'pasien.id', '=', 'registrasi.id_pasien')
+ ->leftJoin('sep', function ($join) {
+    $join->on(
+        DB::raw('sep.no_rawat COLLATE utf8mb4_general_ci'),
+        '=',
+        DB::raw('registrasi.no_rawat COLLATE utf8mb4_general_ci')
+    )
+    ->whereNull('sep.deleted_at');
+})
+    ->select(
+        'registrasi.*',
+        'pasien.no_rm',
+        'pasien.nama as nama_pasien',
+        'pasien.jenis_kelamin',
+        'pegawai.nama_lengkap as nama_dokter',
+        'master_poli.nama_poli',
+        'sep.noSep'
+    )
         ->firstOrFail();
 
-    $qr = base64_encode(
-        QrCode::format('png')->size(150)->generate($no_rawat)
-    );
+        
+    $result = Builder::create()
+        ->writer(new PngWriter())
+        ->data($no_rawat)
+        ->size(150)
+        ->margin(5)
+        ->build();
+
+    $qr = base64_encode($result->getString());
 
     return view('registrasi.etiket',compact('registrasi','qr'));
 }
-
 public function cekIhs(Request $request)
 {
     $request->validate([
