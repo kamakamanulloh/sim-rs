@@ -1,10 +1,12 @@
 import './bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
 import TomSelect from "tom-select";
 import "tom-select/dist/css/tom-select.bootstrap5.css";
 
-// 🔥 expose ke global supaya bisa dipakai di bpjs.js
 window.TomSelect = TomSelect;
 
 import * as bootstrap from 'bootstrap';
@@ -17,7 +19,10 @@ import moment from 'moment';
 window.moment = moment;
 // GLOBAL FUNCTIONS HARUS DIBUAT DULU
 // =============================
-
+$(document).on('hidden.bs.modal', function () {
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+});
 window.showLoading = function (message = 'Memproses...') {
     Swal.fire({
         title: message,
@@ -64,3 +69,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+import './dashboard'
+import './registrasi'
+import './bpjs'

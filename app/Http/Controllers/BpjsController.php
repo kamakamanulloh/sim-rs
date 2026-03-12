@@ -39,6 +39,11 @@ class BpjsController extends Controller
         $endpoint = "referensi/diagnosa/{$kode}";
         return response()->json(vclaim_get($endpoint));
     }
+    public function referensiProcedure($kode)
+    {
+        $endpoint = "referensi/procedure/{$kode}";
+        return response()->json(vclaim_get($endpoint));
+    }
 
 
     // =========================================

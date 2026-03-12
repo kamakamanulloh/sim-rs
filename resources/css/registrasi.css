@@ -75,3 +75,25 @@
     text-decoration: none;
     margin-left: 10px;
 }
+.table-responsive{
+overflow: visible !important;
+}
+
+.dropdown-menu{
+    z-index: 99999 !important;
+}
+.card,
+.card-body,
+.table-responsive {
+    overflow: visible !important;
+}
+.reg-table{
+    overflow-x: auto;
+    overflow-y: visible;
+}
+td.position-relative{
+    overflow: visible !important;
+}
+.card-body{
+    overflow: visible;
+}
